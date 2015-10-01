@@ -1,0 +1,18 @@
+{
+  "name": "typo3/fal_webdav",
+  "type": "typo3-cms-extension",
+  "description": "",
+  "homepage": "http://typo3.org",
+  "license": ["GPL-2.0+"],
+  "require": {
+    "typo3/cms-core": ">=6.0,<8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "TYPO3\\FalWebdav\\": "Classes"
+    }
+  },
+  "replace": {
+    "fal_webdav": "*"
+  }
+}
