@@ -887,6 +887,17 @@ class WebDavDriver extends AbstractHierarchicalFilesystemDriver {
 	}
 
 	/**
+	 * Returns the identifier of a file inside the folder.
+	 *
+	 * @param string $fileName
+	 * @param string $folderIdentifier
+	 * @return string file identifier
+	 */
+	public function getFileInFolder($fileName, $folderIdentifier) {
+		return $this->canonicalizeAndCheckFileIdentifier($folderIdentifier . '/' . $fileName);
+	}
+
+	/**
 	 * Returns a list of files inside the specified path
 	 *
 	 * @param string $folderIdentifier
@@ -928,6 +939,17 @@ class WebDavDriver extends AbstractHierarchicalFilesystemDriver {
 	public function countFilesInFolder($folderIdentifier, $recursive = FALSE,
 	                                   array $filenameFilterCallbacks = array()) {
 		return count($this->getFrontend()->listFiles($folderIdentifier));
+	}
+
+	/**
+	 * Returns the identifier of a folder inside the folder.
+	 *
+	 * @param string $folderName The name of the target folder
+	 * @param string $folderIdentifier
+	 * @return string folder identifier
+	 */
+	public function getFolderInFolder($folderName, $folderIdentifier) {
+		return $this->canonicalizeAndCheckFolderIdentifier($folderIdentifier . '/' . $folderName);
 	}
 
 	/**
