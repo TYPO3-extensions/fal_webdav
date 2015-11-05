@@ -9,7 +9,7 @@ use TYPO3\CMS\Core\Utility;
  *
  * NOTE: This is just a working draft - the methods should be refined and moved to the TYPO3 core.
  *
- * @author Andreas Wolf <andreas.wolf@ikt-werk.de>
+ * @author Andreas Wolf <dev@a-w.io>
  */
 class EncryptionUtility
 {

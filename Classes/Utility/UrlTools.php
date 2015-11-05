@@ -4,7 +4,7 @@ namespace TYPO3\FalWebdav\Utility;
 /**
  * Utility methods for encrypting/decrypting data. Currently only supports Blowfish encryption in CBC mode,
  *
- * @author Andreas Wolf <andreas.wolf@ikt-werk.de>
+ * @author Andreas Wolf <dev@a-w.io>
  */
 class UrlTools
 {

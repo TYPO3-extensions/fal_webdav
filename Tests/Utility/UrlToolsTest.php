@@ -4,7 +4,7 @@ namespace TYPO3\FalWebdav\Tests\Utility;
 /**
  * Testcase for the url tools class
  *
- * @author Andreas Wolf <andreas.wolf@ikt-werk.de>
+ * @author Andreas Wolf <dev@a-w.io>
  */
 class UrlToolsTest extends \Tx_Phpunit_TestCase
 {

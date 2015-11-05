@@ -29,7 +29,7 @@ use TYPO3\FalWebdav\Dav\WebDavClient;
 /**
  * Testcase for the WebDAV driver
  *
- * @author Andreas Wolf <andreas.wolf@typo3.org>
+ * @author Andreas Wolf <dev@a-w.io>
  * @package TYPO3
  * @subpackage fal_webdav
  */

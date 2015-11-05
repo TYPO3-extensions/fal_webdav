@@ -4,7 +4,7 @@ namespace TYPO3\FalWebdav\Backend;
 /**
  * TCEmain integration for the WebDAV driver.
  *
- * @author Andreas Wolf <andreas.wolf@ikt-werk.de>
+ * @author Andreas Wolf <dev@a-w.io>
  */
 class TceMainHook
 {

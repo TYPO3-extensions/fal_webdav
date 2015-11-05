@@ -24,7 +24,7 @@ namespace TYPO3\FalWebdav\Tests\Backend;
 /**
  * Testcase for the WebDAV driver configuration TCEmain hook.
  *
- * @author Andreas Wolf <andreas.wolf@ikt-werk.de>
+ * @author Andreas Wolf <dev@a-w.io>
  * @package TYPO3
  * @subpackage fal_webdav
  */

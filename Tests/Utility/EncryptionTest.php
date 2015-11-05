@@ -24,7 +24,7 @@ namespace TYPO3\FalWebdav\Tests\Utility;
 /**
  * Testcase for the WebDAV driver encryption tools
  *
- * @author Andreas Wolf <andreas.wolf@ikt-werk.de>
+ * @author Andreas Wolf <dev@a-w.io>
  * @package TYPO3
  * @subpackage fal_webdav
  */
