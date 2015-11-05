@@ -27,24 +27,28 @@ namespace TYPO3\FalWebdav\Backend;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-class StatusReport implements \TYPO3\CMS\Reports\StatusProviderInterface {
-	/**
-	 * Returns the status of an extension or (sub)system
-	 *
-	 * @return array An array of tx_reports_reports_status_Status objects
-	 */
-	public function getStatus() {
-		return array(
-			'mcryptAvailability' => $this->getMcryptAvailability()
-		);
-	}
+class StatusReport implements \TYPO3\CMS\Reports\StatusProviderInterface
+{
+    /**
+     * Returns the status of an extension or (sub)system
+     *
+     * @return array An array of tx_reports_reports_status_Status objects
+     */
+    public function getStatus()
+    {
+        return array(
+            'mcryptAvailability' => $this->getMcryptAvailability()
+        );
+    }
 
-	protected function getMcryptAvailability() {
-		$mcryptAvailable = \TYPO3\FalWebdav\Utility\EncryptionUtility::isMcryptAvailable();
-		$severity = $mcryptAvailable === TRUE ? \TYPO3\CMS\Reports\Status::OK : \TYPO3\CMS\Reports\Status::ERROR;
-		$status = ($mcryptAvailable ? '' : 'Not ') . 'Available';
+    protected function getMcryptAvailability()
+    {
+        $mcryptAvailable = \TYPO3\FalWebdav\Utility\EncryptionUtility::isMcryptAvailable();
+        $severity = $mcryptAvailable === true ? \TYPO3\CMS\Reports\Status::OK : \TYPO3\CMS\Reports\Status::ERROR;
+        $status = ($mcryptAvailable ? '' : 'Not ') . 'Available';
 
-		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Reports\\Status', 'PHP extension mcrypt', $status, '', $severity);
-	}
+        return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Reports\\Status',
+            'PHP extension mcrypt', $status, '', $severity);
+    }
 
 }

@@ -17,7 +17,6 @@ namespace TYPO3\FalWebdav\Dav;
 use Sabre\DAV;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\HttpUtility;
-use TYPO3\FalWebdav\Utility\UrlTools;
 
 
 /**
@@ -26,206 +25,221 @@ use TYPO3\FalWebdav\Utility\UrlTools;
  * All identifiers within this class are relative to the DAV storage’s base path and thus have no slash at the
  * beginning (unlike FAL identifiers, which are always prepended with a slash).
  */
-class WebDavFrontend {
+class WebDavFrontend
+{
 
-	/**
-	 * @var WebDavClient
-	 */
-	protected $davClient;
+    /**
+     * @var WebDavClient
+     */
+    protected $davClient;
 
-	/**
-	 * The storage base URL, has to be already URL-encoded
-	 *
-	 * @var string
-	 */
-	protected $baseUrl;
+    /**
+     * The storage base URL, has to be already URL-encoded
+     *
+     * @var string
+     */
+    protected $baseUrl;
 
-	/**
-	 * @var string
-	 */
-	protected $basePath;
+    /**
+     * @var string
+     */
+    protected $basePath;
 
-	/**
-	 * @var \TYPO3\CMS\Core\Log\Logger
-	 */
-	protected $logger;
+    /**
+     * @var \TYPO3\CMS\Core\Log\Logger
+     */
+    protected $logger;
 
-	/**
-	 * @var int
-	 */
-	protected $storageUid;
+    /**
+     * @var int
+     */
+    protected $storageUid;
 
 
-	public function __construct(WebDavClient $client, $baseUrl, $storageUid) {
-		$this->logger = GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger(__CLASS__);
+    public function __construct(WebDavClient $client, $baseUrl, $storageUid)
+    {
+        $this->logger = GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger(__CLASS__);
 
-		$this->davClient = $client;
-		$this->baseUrl = rtrim($baseUrl, '/') . '/';
-		$urlParts = parse_url($this->baseUrl);
-		$this->basePath = $urlParts['path'];
-		$this->storageUid = $storageUid;
-	}
+        $this->davClient = $client;
+        $this->baseUrl = rtrim($baseUrl, '/') . '/';
+        $urlParts = parse_url($this->baseUrl);
+        $this->basePath = $urlParts['path'];
+        $this->storageUid = $storageUid;
+    }
 
-	/**
-	 * @param string $url
-	 * @return string
-	 */
-	protected function encodeUrl($url) {
-		$urlParts = parse_url($url);
-		$urlParts['path'] = $this->urlEncodePath($urlParts['path']);
+    /**
+     * @param string $url
+     * @return string
+     */
+    protected function encodeUrl($url)
+    {
+        $urlParts = parse_url($url);
+        $urlParts['path'] = $this->urlEncodePath($urlParts['path']);
 
-		return HttpUtility::buildUrl($urlParts);
-	}
+        return HttpUtility::buildUrl($urlParts);
+    }
 
-	/**
-	 * Wrapper around the PROPFIND method of the WebDAV client to get proper local error handling.
-	 *
-	 * @param string $path
-	 * @return array
-	 * @throws DAV\Exception\NotFound if the given URL does not hold a resource
-	 *
-	 * TODO define proper error handling for other cases
-	 */
-	public function propFind($path) {
-		$url = $this->baseUrl . $path;
-		$encodedUrl = $this->encodeUrl($url);
+    /**
+     * Wrapper around the PROPFIND method of the WebDAV client to get proper local error handling.
+     *
+     * @param string $path
+     * @return array
+     * @throws DAV\Exception\NotFound if the given URL does not hold a resource
+     *
+     * TODO define proper error handling for other cases
+     */
+    public function propFind($path)
+    {
+        $url = $this->baseUrl . $path;
+        $encodedUrl = $this->encodeUrl($url);
 
-		try {
-			// propfind() already decodes the XML, so we get back an array
-			$propfindResultArray = $this->davClient->propfind($encodedUrl, NULL, 1);
+        try {
+            // propfind() already decodes the XML, so we get back an array
+            $propfindResultArray = $this->davClient->propfind($encodedUrl, null, 1);
 
-			// the returned items are indexed by their key, so sort them here to return the correct items.
-			// At least Apache does not sort them before returning
-			uksort($propfindResultArray, 'strnatcasecmp');
+            // the returned items are indexed by their key, so sort them here to return the correct items.
+            // At least Apache does not sort them before returning
+            uksort($propfindResultArray, 'strnatcasecmp');
 
-			return $propfindResultArray;
-		} catch (DAV\Exception\NotFound $exception) {
-			$this->logger->warning('URL not found: ' . $url);
-			// If a file is not found, we have to deal with that on a higher level, so throw the exception again
-			throw $exception;
-		} catch (DAV\Exception $exception) {
-			// log all other exceptions
-			$this->logger->error(sprintf(
-				'Error while executing DAV PROPFIND request. Original message: "%s" (Exception %s, id: %u)',
-				$exception->getMessage(), get_class($exception), $exception->getCode()
-			));
-			// TODO check how we can let this propagate to the driver
-			return array();
-		}
-	}
+            return $propfindResultArray;
+        } catch (DAV\Exception\NotFound $exception) {
+            $this->logger->warning('URL not found: ' . $url);
+            // If a file is not found, we have to deal with that on a higher level, so throw the exception again
+            throw $exception;
+        } catch (DAV\Exception $exception) {
+            // log all other exceptions
+            $this->logger->error(sprintf(
+                'Error while executing DAV PROPFIND request. Original message: "%s" (Exception %s, id: %u)',
+                $exception->getMessage(), get_class($exception), $exception->getCode()
+            ));
 
-	/**
-	 *
-	 * @param string $path
-	 * @return array A list of file names in the path
-	 */
-	public function listFiles($path) {
-		$files = $this->listItems($path, function ($currentItem) {
-			if (substr($currentItem, -1) == '/') {
-				return FALSE;
-			}
-			return TRUE;
-		});
+            // TODO check how we can let this propagate to the driver
+            return array();
+        }
+    }
 
-		return $files;
-	}
+    /**
+     *
+     * @param string $path
+     * @return array A list of file names in the path
+     */
+    public function listFiles($path)
+    {
+        $files = $this->listItems($path, function ($currentItem) {
+            if (substr($currentItem, -1) == '/') {
+                return false;
+            }
 
-	/**
-	 * @param string $path
-	 * @return array A list of folder names in the path
-	 */
-	public function listFolders($path) {
-		$folders = $this->listItems($path, function ($currentItem) {
-			if (substr($currentItem, -1) != '/') {
-				return FALSE;
-			}
-			return TRUE;
-		});
+            return true;
+        });
 
-		return $folders;
-	}
+        return $files;
+    }
 
-	protected function listItems($path, $itemFilterCallback) {
-		$path = trim($path, '/');
-		if (strlen($path) > 0) {
-			$path .= '/';
-		}
-		$urlParts = parse_url($this->baseUrl . $path);
-		$unencodedBasePath = $urlParts['path'];
+    /**
+     * @param string $path
+     * @return array A list of folder names in the path
+     */
+    public function listFolders($path)
+    {
+        $folders = $this->listItems($path, function ($currentItem) {
+            if (substr($currentItem, -1) != '/') {
+                return false;
+            }
 
-		$result = $this->propFind($path);
+            return true;
+        });
 
-		// remove first entry, as it is the folder itself
-		array_shift($result);
+        return $folders;
+    }
 
-		$files = array();
-		// $filePath contains the path part of the URL, no server name and protocol!
-		foreach ($result as $filePath => $fileInfo) {
-			$decodedFilePath = urldecode($filePath);
-			$decodedFilePath = substr($decodedFilePath, strlen($unencodedBasePath));
-			// ignore folder entries
-			if (!$itemFilterCallback($decodedFilePath)) {
-				continue;
-			}
+    protected function listItems($path, $itemFilterCallback)
+    {
+        $path = trim($path, '/');
+        if (strlen($path) > 0) {
+            $path .= '/';
+        }
+        $urlParts = parse_url($this->baseUrl . $path);
+        $unencodedBasePath = $urlParts['path'];
 
-			// TODO if depth is > 1, we will also include deeper entries here, which we should not
+        $result = $this->propFind($path);
 
-			$files[] = basename($decodedFilePath);
-		}
+        // remove first entry, as it is the folder itself
+        array_shift($result);
 
-		return $files;
-	}
+        $files = array();
+        // $filePath contains the path part of the URL, no server name and protocol!
+        foreach ($result as $filePath => $fileInfo) {
+            $decodedFilePath = urldecode($filePath);
+            $decodedFilePath = substr($decodedFilePath, strlen($unencodedBasePath));
+            // ignore folder entries
+            if (!$itemFilterCallback($decodedFilePath)) {
+                continue;
+            }
 
-	/**
-	 * Returns information about the given file.
-	 *
-	 * TODO define what to return
-	 *
-	 * @param string $path
-	 * @return array
-	 */
-	public function getFileInfo($path) {
-		// the leading slash is already included in baseURL/basePath
-		$path = ltrim($path, '/');
+            // TODO if depth is > 1, we will also include deeper entries here, which we should not
 
-		$result = $this->propFind($path);
+            $files[] = basename($decodedFilePath);
+        }
 
-		return $this->extractFileInfo($path, $result[$this->basePath . $this->urlEncodePath($path)]);
-	}
+        return $files;
+    }
 
-	protected function extractFileInfo($path, $propFindArray) {
-		$fileInfo = array(
-			'mtime' => (int)strtotime($propFindArray['{DAV:}getlastmodified']),
-			'ctime' => (int)strtotime($propFindArray['{DAV:}creationdate']),
-			'mimetype' => (string)$propFindArray['{DAV:}getcontenttype'],
-			'name' => basename($path),
-			'size' => (int)$propFindArray['{DAV:}getcontentlength'],
-			'identifier' => '/' . $path,
-			'storage' => $this->storageUid,
-			'identifier_hash' => sha1('/' . $path),
-			'folder_hash' => sha1('/' . $this->getFolderPathFromIdentifier($path)),
-		);
+    /**
+     * Returns information about the given file.
+     *
+     * TODO define what to return
+     *
+     * @param string $path
+     * @return array
+     */
+    public function getFileInfo($path)
+    {
+        // the leading slash is already included in baseURL/basePath
+        $path = ltrim($path, '/');
 
-		return $fileInfo;
-	}
+        $result = $this->propFind($path);
 
-	/**
-	 * @param string $path The identifier, without a leading slash!
-	 * @return string The folder path, without a trailing slash. If the file is on root level, an empty string is returned
-	 */
-	protected function getFolderPathFromIdentifier($path) {
-		$dirPath = dirname($path);
+        return $this->extractFileInfo($path, $result[$this->basePath . $this->urlEncodePath($path)]);
+    }
 
-		return $dirPath . ($dirPath !== '') ? '/' : '';
-	}
+    protected function extractFileInfo($path, $propFindArray)
+    {
+        $fileInfo = array(
+            'mtime' => (int)strtotime($propFindArray['{DAV:}getlastmodified']),
+            'ctime' => (int)strtotime($propFindArray['{DAV:}creationdate']),
+            'mimetype' => (string)$propFindArray['{DAV:}getcontenttype'],
+            'name' => basename($path),
+            'size' => (int)$propFindArray['{DAV:}getcontentlength'],
+            'identifier' => '/' . $path,
+            'storage' => $this->storageUid,
+            'identifier_hash' => sha1('/' . $path),
+            'folder_hash' => sha1('/' . $this->getFolderPathFromIdentifier($path)),
+        );
 
-	/**
-	 * @param $path
-	 * @return string
-	 */
-	protected function urlEncodePath($path) {
-		// using urlencode() does not work because it encodes a space as "+" and not as "%20".
-		return implode('/', array_map('rawurlencode', explode('/', $path)));
-	}
+        return $fileInfo;
+    }
+
+    /**
+     * @param string $path The identifier, without a leading slash!
+     * @return string The folder path, without a trailing slash. If the file is on root level, an empty string is
+     *     returned
+     */
+    protected function getFolderPathFromIdentifier($path)
+    {
+        $dirPath = dirname($path);
+
+        return $dirPath . ($dirPath !== '') ? '/' : '';
+    }
+
+    /**
+     * @param $path
+     * @return string
+     */
+    protected function urlEncodePath($path)
+    {
+        // using urlencode() does not work because it encodes a space as "+" and not as "%20".
+        return implode('/', array_map('rawurlencode', explode('/', $path)));
+    }
 
 }
